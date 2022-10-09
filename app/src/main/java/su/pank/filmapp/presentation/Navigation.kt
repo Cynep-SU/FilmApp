@@ -8,7 +8,10 @@ import androidx.navigation.compose.composable
 @Composable
 fun NavigationSetUp(navController: NavHostController) {
     NavHost(navController, startDestination = "login") {
-        composable("login") { LogInScreen() }
+        composable("login") { _ ->
+            LogInScreen()
+        }
         composable("reg") { RegScreen() }
+        composable("main") { MainScreen()}
     }
 }

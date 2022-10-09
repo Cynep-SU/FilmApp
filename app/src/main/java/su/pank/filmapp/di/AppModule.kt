@@ -9,7 +9,7 @@ import su.pank.filmapp.domain.viewmodel.LoginViewModel
 import su.pank.filmapp.domain.viewmodel.RegViewModel
 
 val appModule = module {
-    viewModel { LoginViewModel(get(), get()) }
+    viewModel { LoginViewModel(get()) }
     viewModel { RegViewModel(get()) }
     single {
         NavHostController(get()).apply {

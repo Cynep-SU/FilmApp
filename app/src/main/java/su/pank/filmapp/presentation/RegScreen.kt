@@ -106,7 +106,7 @@ fun RegScreen() {
             Text(text = "Зарегестрироваться")
         }
         Button(
-            onClick = { navController.navigate("login") },
+            onClick = { navController.popBackStack() },
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.secondaryContainer,
                 contentColor = MaterialTheme.colorScheme.onSecondaryContainer

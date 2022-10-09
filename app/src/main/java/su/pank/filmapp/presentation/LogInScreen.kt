@@ -9,16 +9,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import org.koin.androidx.compose.get
-import org.koin.androidx.compose.getViewModel
 import su.pank.filmapp.R
 import su.pank.filmapp.domain.viewmodel.LoginViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LogInScreen() {
-    val loginViewModel: LoginViewModel = getViewModel()
+    val loginViewModel: LoginViewModel = viewModel()
 
     BoxWithConstraints {
         val height = maxHeight
@@ -31,7 +31,8 @@ fun LogInScreen() {
             Image(
                 painter = painterResource(id = R.drawable.logo_with_title),
                 contentDescription = null,
-                modifier = Modifier.size(if (height < 400.dp) 100.dp else 150.dp)
+                modifier = Modifier
+                    .size(if (height < 400.dp) 100.dp else 150.dp)
                     .align(Alignment.CenterHorizontally)
             )
             OutlinedTextField(
@@ -69,7 +70,10 @@ fun LogInScreen() {
             }
             Button(
                 onClick = { navController.navigate("reg") },
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                ),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(text = "Регистрация")

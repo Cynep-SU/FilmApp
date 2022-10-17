@@ -14,38 +14,34 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.source.ProgressiveMediaSource
-import com.google.android.exoplayer2.ui.PlayerView
-import com.google.android.exoplayer2.upstream.DataSource
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
-import com.google.android.exoplayer2.util.Util
+import com.google.android.exoplayer2.ui.StyledPlayerView
 import su.pank.filmapp.domain.model.Film
 import su.pank.filmapp.domain.viewmodel.FilmsViewModel
+import su.pank.filmapp.domain.viewmodel.Status
 import su.pank.filmapp.presentation.theme.FilmAppTheme
 
 
 @Composable
 fun Recommendation(model: FilmsViewModel = viewModel()) {
+
     Box() {
-        Image(
-            painter = painterResource(id = model.recommendFilm.Logo),
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current).data(model.recommendFilm.Logo).crossfade(true).build(),
             contentDescription = model.recommendFilm.Name,
             Modifier.fillMaxWidth(),
             contentScale = ContentScale.FillWidth,
-
         )
-
         Button(
             onClick = { /*TODO*/ }, modifier = Modifier
                 .padding(0.dp, 0.dp, 0.dp, 40.dp)
@@ -66,7 +62,7 @@ fun FilmsRow(name: String, filmList: List<Film>) {
         LazyRow {
             items(filmList) { film: Film ->
                 Image(
-                    painter = painterResource(id = film.Logo),
+                    painter = rememberAsyncImagePainter(film.Logo),
                     contentDescription = film.Name,
                     modifier = Modifier
                         .size(100.dp, 144.dp)
@@ -85,7 +81,7 @@ fun BigFilmsRow(name: String, filmList: List<Film>) {
         LazyRow {
             items(filmList) { film: Film ->
                 Image(
-                    painter = painterResource(id = film.Logo),
+                    painter = rememberAsyncImagePainter(film.Logo),
                     contentDescription = film.Name,
                     modifier = Modifier
                         .size(240.dp, 144.dp)
@@ -107,13 +103,15 @@ fun VideoPlayer(source: String) {
             this.prepare()
         }
     }
-    AndroidView({ context ->
-        PlayerView(context).apply {
-            player = exoPlayer
-        }
-    }, modifier = Modifier
-        .fillMaxWidth()
-        .height(240.dp))
+    AndroidView(
+        { context ->
+            StyledPlayerView(context).apply {
+                player = exoPlayer
+            }
+        }, modifier = Modifier
+            .fillMaxWidth()
+            .height(240.dp)
+    )
 
 }
 
@@ -125,7 +123,7 @@ fun Watched(model: FilmsViewModel = viewModel()) {
         style = MaterialTheme.typography.titleLarge,
         modifier = Modifier.padding(20.dp)
     )
-    VideoPlayer(source = "http://ftp.labdoo.org/download/Public/videos/for-technicians/install-lubuntu-EN.mp4")
+    VideoPlayer(source = model.watched)
 
 }
 
@@ -139,13 +137,20 @@ fun GeneralScreen() {
             .verticalScroll(scrollState)
     ) {
         val model: FilmsViewModel = viewModel()
-        Recommendation(model)
-        FilmsRow(name = "В тренде", filmList = model.trendingFilms)
-        Watched(model)
-        BigFilmsRow(name = "Новое", filmList = model.trendingFilms)
-        FilmsRow(name = "Для вас", filmList = model.trendingFilms)
-        Button(onClick = { /*TODO*/ }, modifier = Modifier.fillMaxWidth().padding(10.dp)) {
-            Text(text = "Указать интересы")
+        if (model.status.value == Status.Success) {
+            println(model.recommendFilm)
+            Recommendation(model)
+            FilmsRow(name = "В тренде", filmList = model.trendingFilms)
+            Watched(model)
+            BigFilmsRow(name = "Новое", filmList = model.newFilms)
+            FilmsRow(name = "Для вас", filmList = model.forYou)
+            Button(
+                onClick = { /*TODO*/ }, modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)
+            ) {
+                Text(text = "Указать интересы")
+            }
         }
     }
 }

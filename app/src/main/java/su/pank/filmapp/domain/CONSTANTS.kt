@@ -6,14 +6,14 @@ import su.pank.filmapp.domain.model.Screen
 
 class CONSTANTS {
     companion object {
-        val BASE_URL = "http://cinema.areas.su/"
+        val AUTH_URL = "http://cinema.areas.su/"
+        val BD_URL = "https://www.breakingbadapi.com/api/"
 
         val SCREENS = listOf(
             Screen("general", "Главная", R.drawable.tv),
             Screen("recommendation", "Подборка", R.drawable.rec),
             Screen("collection", "Коллекция", R.drawable.star),
             Screen("profile", "Профиль", R.drawable.profile)
-
         )
 
     }

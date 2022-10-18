@@ -1,7 +1,10 @@
 package su.pank.filmapp.domain.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
+import androidx.navigation.NavHostController
+import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -21,8 +24,9 @@ class FilmsViewModel : ViewModel() {
     lateinit var trendingFilms: List<Film>
     lateinit var newFilms: List<Film>
     lateinit var forYou: List<Film>
-    val watched = "https://github.com/Cynep-SU/FilmApp/blob/master/app/src/main/res/drawable-v24/saul.mp4?raw=true"
-    private lateinit var films: List<Film>;
+    val watched = "https://github.com/Cynep-SU/FilmApp/blob/master/videos/saul.mp4?raw=true"
+    private lateinit var films: List<Film>
+    lateinit var navHostController: NavHostController
 
     init {
         val filmApi: BreakingBadApi = get(BreakingBadApi::class.java)
@@ -44,4 +48,9 @@ class FilmsViewModel : ViewModel() {
             status.value = Status.Success
         }
     }
+
+    fun openFilm(film: Film){
+        navHostController.navigate("film/${film.id}")
+    }
+
 }

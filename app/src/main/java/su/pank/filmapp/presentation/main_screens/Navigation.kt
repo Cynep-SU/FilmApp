@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -13,19 +14,32 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import su.pank.filmapp.domain.CONSTANTS.Companion.SCREENS
 import su.pank.filmapp.domain.model.Film
+import su.pank.filmapp.domain.viewmodel.FilmsViewModel
 
 class Token : TypeToken<List<String>>()
 
 
 @Composable
 fun SetUpNavigation(navHostController: NavHostController, paddingValues: PaddingValues) {
+    val filmsViewModel: FilmsViewModel = viewModel()
     NavHost(
         navController = navHostController,
         startDestination = SCREENS.first().name,
         modifier = Modifier.padding(paddingValues)
     ) {
         for (el in SCREENS) {
-            composable(el.name) { GeneralScreen(navHostController) }
+            composable(el.name) {
+                when (el.name){
+                    "general" -> {
+
+                        GeneralScreen(navHostController, filmsViewModel)
+                    }
+                    else -> {
+                        GeneralScreen(navHostController, filmsViewModel)
+                    }
+                }
+
+            }
         }
         composable(
             "film/{id}/{name}/{logo}/{tags}/{description}/{ageRate}",
@@ -36,10 +50,16 @@ fun SetUpNavigation(navHostController: NavHostController, paddingValues: Padding
                 navArgument("tags") { type = NavType.StringType },
                 navArgument("description") { type = NavType.StringType },
                 navArgument("ageRate") { type = NavType.StringType },
-                )
+            )
         ) {
             val args = it.arguments!!
-            val film = Film(args.getInt("id"), args.getString("name")!!, args.getString("logo")!!.replace(" ", "/"), Gson().fromJson(args.getString("tags"), Token().type), args.getString("description")!!)
+            val film = Film(
+                args.getInt("id"),
+                args.getString("name")!!,
+                args.getString("logo")!!.replace(" ", "/"),
+                Gson().fromJson(args.getString("tags"), Token().type),
+                args.getString("description")!!
+            )
 
 
             FilmScreen(

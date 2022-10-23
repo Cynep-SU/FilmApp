@@ -3,6 +3,8 @@ package su.pank.filmapp.domain
 import androidx.compose.ui.graphics.Color
 import su.pank.filmapp.R
 import su.pank.filmapp.domain.model.Screen
+import su.pank.filmapp.domain.viewmodel.FilmsViewModel
+import kotlin.reflect.typeOf
 
 
 class CONSTANTS {

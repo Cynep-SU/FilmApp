@@ -1,13 +1,19 @@
 package su.pank.filmapp.presentation.main_screens
 
-import androidx.compose.foundation.*
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,10 +28,7 @@ import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
-import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.ui.StyledPlayerView
-import org.koin.androidx.compose.get
 import su.pank.filmapp.domain.model.Film
 import su.pank.filmapp.domain.viewmodel.FilmsViewModel
 import su.pank.filmapp.domain.viewmodel.Status
@@ -35,17 +38,21 @@ import su.pank.filmapp.domain.viewmodel.Status
 fun Recommendation(navHostController: NavHostController, model: FilmsViewModel = viewModel()) {
     Box() {
         AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current).data(model.recommendFilm.Logo).crossfade(true).build(),
+            model = ImageRequest.Builder(LocalContext.current).data(model.recommendFilm.Logo)
+                .crossfade(true).build(),
             contentDescription = model.recommendFilm.Name,
             Modifier.fillMaxWidth(),
             contentScale = ContentScale.FillWidth,
         )
         // Затемнение, довольно весело это сделано в Compose
-        Box(modifier = Modifier
-            .matchParentSize()
-            .background(Brush.linearGradient(listOf(Color.Transparent, Color.Black))) )
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .background(Brush.linearGradient(listOf(Color.Transparent, Color.Black)))
+        )
         Button(
-            onClick = { model.openFilm(model.recommendFilm, navHostController) }, modifier = Modifier
+            onClick = { model.openFilm(model.recommendFilm, navHostController) },
+            modifier = Modifier
                 .padding(0.dp, 0.dp, 0.dp, 40.dp)
                 .align(
                     Alignment.BottomCenter
@@ -58,8 +65,12 @@ fun Recommendation(navHostController: NavHostController, model: FilmsViewModel =
 
 
 @Composable
-fun FilmsRow(name: String, filmList: List<Film>, navHostController: NavHostController) {
-    val model: FilmsViewModel = viewModel()
+fun FilmsRow(
+    name: String,
+    filmList: List<Film>,
+    navHostController: NavHostController,
+    model: FilmsViewModel
+) {
     Column(modifier = Modifier.padding(10.dp)) {
         Text(name, style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(10.dp))
         LazyRow {
@@ -69,7 +80,8 @@ fun FilmsRow(name: String, filmList: List<Film>, navHostController: NavHostContr
                     contentDescription = film.Name,
                     modifier = Modifier
                         .size(100.dp, 144.dp)
-                        .padding(0.dp, 0.dp, 10.dp, 0.dp).clickable { model.openFilm(film, navHostController) },
+                        .padding(0.dp, 0.dp, 10.dp, 0.dp)
+                        .clickable { model.openFilm(film, navHostController) },
                     contentScale = ContentScale.Crop
                 )
             }
@@ -78,8 +90,12 @@ fun FilmsRow(name: String, filmList: List<Film>, navHostController: NavHostContr
 }
 
 @Composable
-fun BigFilmsRow(name: String, filmList: List<Film>, navHostController: NavHostController) {
-    val model: FilmsViewModel = viewModel()
+fun BigFilmsRow(
+    name: String,
+    filmList: List<Film>,
+    navHostController: NavHostController,
+    model: FilmsViewModel
+) {
     Column(modifier = Modifier.padding(10.dp)) {
         Text(name, style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(10.dp))
         LazyRow {
@@ -98,28 +114,6 @@ fun BigFilmsRow(name: String, filmList: List<Film>, navHostController: NavHostCo
     }
 }
 
-@Composable
-fun VideoPlayer(source: String) {
-    val context = LocalContext.current
-    val exoPlayer = remember {
-        ExoPlayer.Builder(context).build().apply {
-            setMediaItem(MediaItem.fromUri(source))
-
-            this.prepare()
-        }
-    }
-    AndroidView(
-        { context ->
-            StyledPlayerView(context).apply {
-                player = exoPlayer
-            }
-        }, modifier = Modifier
-            .fillMaxWidth()
-            .height(240.dp)
-    )
-
-}
-
 
 @Composable
 fun Watched(model: FilmsViewModel = viewModel()) {
@@ -128,32 +122,74 @@ fun Watched(model: FilmsViewModel = viewModel()) {
         style = MaterialTheme.typography.titleLarge,
         modifier = Modifier.padding(20.dp)
     )
-    VideoPlayer(source = model.watched)
 
+
+
+//    AndroidView(
+//        { context ->
+//            StyledPlayerView(context).apply {
+//                player = model.videoPlayer
+//            }
+//        }, modifier = Modifier
+//            .fillMaxWidth()
+//            .height(240.dp)
+//    )
 }
 
 
 @Composable
-fun GeneralScreen(navHostController: NavHostController) {
-    val filmsViewModel: FilmsViewModel = get()
-    Column(
+fun GeneralScreen(navHostController: NavHostController, filmsViewModel: FilmsViewModel) {
+    val isLoaded = remember {
+        derivedStateOf {
+            filmsViewModel.status == Status.Success
+        }
+    }
+    LazyColumn(
+        state= filmsViewModel.scrollState,
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(filmsViewModel.scrollState)
+
     ) {
 
-        if (filmsViewModel.status == Status.Success) {
-            Recommendation(navHostController, filmsViewModel)
-            FilmsRow(name = "В тренде", filmList = filmsViewModel.trendingFilms, navHostController)
-            Watched(filmsViewModel)
-            BigFilmsRow(name = "Новое", filmList = filmsViewModel.newFilms, navHostController)
-            FilmsRow(name = "Для вас", filmList = filmsViewModel.forYou, navHostController)
-            Button(
-                onClick = { /*TODO*/ }, modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp)
-            ) {
-                Text(text = "Указать интересы")
+        if (isLoaded.value) {
+            item {
+                Recommendation(navHostController, filmsViewModel)
+            }
+            item {
+                FilmsRow(
+                    name = "В тренде",
+                    filmList = filmsViewModel.trendingFilms,
+                    navHostController,
+                    filmsViewModel
+                )
+            }
+            item {
+                Watched(filmsViewModel)
+            }
+            item {
+                BigFilmsRow(
+                    name = "Новое",
+                    filmList = filmsViewModel.newFilms,
+                    navHostController,
+                    filmsViewModel
+                )
+            }
+            item {
+                FilmsRow(
+                    name = "Для вас",
+                    filmList = filmsViewModel.forYou,
+                    navHostController,
+                    filmsViewModel
+                )
+            }
+            item {
+                Button(
+                    onClick = { /*TODO*/ }, modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
+                ) {
+                    Text(text = "Указать интересы")
+                }
             }
         }
     }

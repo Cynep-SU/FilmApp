@@ -20,10 +20,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.google.android.exoplayer2.ui.StyledPlayerView
 import org.koin.androidx.compose.get
 import su.pank.filmapp.R
 import su.pank.filmapp.domain.CONSTANTS
@@ -112,12 +114,22 @@ fun logoWithTags(film: Film) {
 
 @Composable
 fun WatchFilm(film: Film) {
+    val filmViewModel: FilmViewModel = viewModel()
+
     Text(
         "Смотреть",
         style = MaterialTheme.typography.titleLarge,
         modifier = Modifier.padding(20.dp)
     )
-    VideoPlayer(source = CONSTANTS.SOUL_GOODMAN)
+    AndroidView(
+        { context ->
+            StyledPlayerView(context).apply {
+                player = filmViewModel.videoPlayer
+            }
+        }, modifier = Modifier
+            .fillMaxWidth()
+            .height(240.dp)
+    )
 }
 
 @Composable

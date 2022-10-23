@@ -18,7 +18,7 @@ fun MainScreen() {
     val navController: NavHostController = rememberNavController()
 
     Scaffold(bottomBar = {
-        if (SCREENS.map { screen -> screen.name }.contains(navController.currentBackStackEntryAsState().value?.destination?.route))
+        // if (SCREENS.map { screen -> screen.name }.contains(navController.currentBackStackEntryAsState().value?.destination?.route))
         NavigationBar {
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val currentDestination = navBackStackEntry?.destination

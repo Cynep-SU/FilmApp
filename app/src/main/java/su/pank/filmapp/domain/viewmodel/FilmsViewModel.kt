@@ -1,17 +1,13 @@
 package su.pank.filmapp.domain.viewmodel
 
-import android.util.Log
 import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
 import com.google.gson.Gson
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.koin.java.KoinJavaComponent.get
 import su.pank.filmapp.domain.model.Film
 import su.pank.filmapp.source.remote.BreakingBadApi
@@ -22,7 +18,7 @@ enum class Status {
 }
 
 class FilmsViewModel : ViewModel() {
-    var status = mutableStateOf(Status.Loaded)
+    var status by mutableStateOf(Status.Loaded)
     val scrollState = ScrollState(0)
     lateinit var recommendFilm: Film
     lateinit var trendingFilms: List<Film>
@@ -34,26 +30,32 @@ class FilmsViewModel : ViewModel() {
     init {
         val filmApi: BreakingBadApi = get(BreakingBadApi::class.java)
         CoroutineScope(Dispatchers.IO).launch {
-            val getRec = async {
-                recommendFilm = filmApi.getRandomCharacter(1)[0]
-            }
-            val getForYou = async {
-                forYou = filmApi.getRandomCharacter(10)
-            }
-            val getNew = async {
-                newFilms = filmApi.getRandomCharacter(10)
-            }
-            films = filmApi.getAllCharacters()
+            awaitAll(
+                async {
+                    recommendFilm = filmApi.getRandomCharacter(1)[0]
+                },
+                async {
+                    forYou = filmApi.getRandomCharacter(10)
+                },
+                async {
+                    newFilms = filmApi.getRandomCharacter(10)
+                }, async {
+                    films = filmApi.getAllCharacters()
+                })
             trendingFilms = films
-            getNew.await()
-            getForYou.await()
-            getRec.await()
-            status.value = Status.Success
+            status = Status.Success
         }
     }
 
-    fun openFilm(film: Film, navHostController: NavHostController){
-        navHostController.navigate("film/${film.id}/${film.Name}/${film.Logo.replace("/"," ")}/${Gson().toJson(film.tags)}/${film.description}/${film.ageRate}")
+    fun openFilm(film: Film, navHostController: NavHostController) {
+        navHostController.navigate(
+            "film/${film.id}/${film.Name}/${
+                film.Logo.replace(
+                    "/",
+                    " "
+                )
+            }/${Gson().toJson(film.tags)}/${film.description}/${film.ageRate}"
+        )
     }
 
 }

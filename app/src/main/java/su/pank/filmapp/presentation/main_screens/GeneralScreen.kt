@@ -142,7 +142,7 @@ fun GeneralScreen(navHostController: NavHostController) {
             .verticalScroll(filmsViewModel.scrollState)
     ) {
 
-        if (filmsViewModel.status.value == Status.Success) {
+        if (filmsViewModel.status == Status.Success) {
             Recommendation(navHostController, filmsViewModel)
             FilmsRow(name = "В тренде", filmList = filmsViewModel.trendingFilms, navHostController)
             Watched(filmsViewModel)

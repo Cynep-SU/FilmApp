@@ -4,6 +4,7 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
 import su.pank.filmapp.domain.model.Film
+import su.pank.filmapp.domain.model.QuoteDTO
 
 interface BreakingBadApi {
     @GET("characters")
@@ -14,4 +15,7 @@ interface BreakingBadApi {
 
     @GET("characters/{id}")
     suspend fun getCharacterById(@Path("id") id: Int): List<Film>
+
+    @GET("quote")
+    suspend fun getQuoteByCharacter(@Query("author") author: String): List<QuoteDTO>
 }

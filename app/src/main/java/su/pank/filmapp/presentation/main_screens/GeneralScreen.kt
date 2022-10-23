@@ -6,7 +6,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -16,7 +15,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -31,12 +29,10 @@ import org.koin.androidx.compose.get
 import su.pank.filmapp.domain.model.Film
 import su.pank.filmapp.domain.viewmodel.FilmsViewModel
 import su.pank.filmapp.domain.viewmodel.Status
-import su.pank.filmapp.presentation.theme.FilmAppTheme
 
 
 @Composable
-fun Recommendation(model: FilmsViewModel = viewModel()) {
-
+fun Recommendation(navHostController: NavHostController, model: FilmsViewModel = viewModel()) {
     Box() {
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current).data(model.recommendFilm.Logo).crossfade(true).build(),
@@ -49,7 +45,7 @@ fun Recommendation(model: FilmsViewModel = viewModel()) {
             .matchParentSize()
             .background(Brush.linearGradient(listOf(Color.Transparent, Color.Black))) )
         Button(
-            onClick = { model.openFilm(model.recommendFilm) }, modifier = Modifier
+            onClick = { model.openFilm(model.recommendFilm, navHostController) }, modifier = Modifier
                 .padding(0.dp, 0.dp, 0.dp, 40.dp)
                 .align(
                     Alignment.BottomCenter
@@ -62,7 +58,7 @@ fun Recommendation(model: FilmsViewModel = viewModel()) {
 
 
 @Composable
-fun FilmsRow(name: String, filmList: List<Film>) {
+fun FilmsRow(name: String, filmList: List<Film>, navHostController: NavHostController) {
     val model: FilmsViewModel = viewModel()
     Column(modifier = Modifier.padding(10.dp)) {
         Text(name, style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(10.dp))
@@ -73,7 +69,7 @@ fun FilmsRow(name: String, filmList: List<Film>) {
                     contentDescription = film.Name,
                     modifier = Modifier
                         .size(100.dp, 144.dp)
-                        .padding(0.dp, 0.dp, 10.dp, 0.dp).clickable { model.openFilm(film) },
+                        .padding(0.dp, 0.dp, 10.dp, 0.dp).clickable { model.openFilm(film, navHostController) },
                     contentScale = ContentScale.Crop
                 )
             }
@@ -82,7 +78,7 @@ fun FilmsRow(name: String, filmList: List<Film>) {
 }
 
 @Composable
-fun BigFilmsRow(name: String, filmList: List<Film>) {
+fun BigFilmsRow(name: String, filmList: List<Film>, navHostController: NavHostController) {
     val model: FilmsViewModel = viewModel()
     Column(modifier = Modifier.padding(10.dp)) {
         Text(name, style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(10.dp))
@@ -94,7 +90,7 @@ fun BigFilmsRow(name: String, filmList: List<Film>) {
                     modifier = Modifier
                         .size(240.dp, 144.dp)
                         .padding(0.dp, 0.dp, 10.dp, 0.dp)
-                        .clickable { model.openFilm(film) },
+                        .clickable { model.openFilm(film, navHostController) },
                     contentScale = ContentScale.Crop
                 )
             }
@@ -139,20 +135,19 @@ fun Watched(model: FilmsViewModel = viewModel()) {
 
 @Composable
 fun GeneralScreen(navHostController: NavHostController) {
-    val scrollState = rememberScrollState()
+    val filmsViewModel: FilmsViewModel = get()
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(scrollState)
+            .verticalScroll(filmsViewModel.scrollState)
     ) {
-        val model: FilmsViewModel = viewModel()
-        model.navHostController = navHostController
-        if (model.status.value == Status.Success) {
-            Recommendation(model)
-            FilmsRow(name = "В тренде", filmList = model.trendingFilms)
-            Watched(model)
-            BigFilmsRow(name = "Новое", filmList = model.newFilms)
-            FilmsRow(name = "Для вас", filmList = model.forYou)
+
+        if (filmsViewModel.status.value == Status.Success) {
+            Recommendation(navHostController, filmsViewModel)
+            FilmsRow(name = "В тренде", filmList = filmsViewModel.trendingFilms, navHostController)
+            Watched(filmsViewModel)
+            BigFilmsRow(name = "Новое", filmList = filmsViewModel.newFilms, navHostController)
+            FilmsRow(name = "Для вас", filmList = filmsViewModel.forYou, navHostController)
             Button(
                 onClick = { /*TODO*/ }, modifier = Modifier
                     .fillMaxWidth()

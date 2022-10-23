@@ -24,7 +24,7 @@ class CONSTANTS {
                 "16+" to Color(0xFFF26E45),
                 "12+" to Color(0xFFF4A992),
                 "6+" to Color(0xFFFAD5C9),
-                "0" to Color.White
+                "0+" to Color.White
                 )
 
     }

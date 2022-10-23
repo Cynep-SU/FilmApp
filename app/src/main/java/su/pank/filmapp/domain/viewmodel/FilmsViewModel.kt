@@ -1,5 +1,8 @@
 package su.pank.filmapp.domain.viewmodel
 
+import android.util.Log
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
@@ -20,13 +23,13 @@ enum class Status {
 
 class FilmsViewModel : ViewModel() {
     var status = mutableStateOf(Status.Loaded)
+    val scrollState = ScrollState(0)
     lateinit var recommendFilm: Film
     lateinit var trendingFilms: List<Film>
     lateinit var newFilms: List<Film>
     lateinit var forYou: List<Film>
     val watched = "https://github.com/Cynep-SU/FilmApp/blob/master/videos/saul.mp4?raw=true"
     private lateinit var films: List<Film>
-    lateinit var navHostController: NavHostController
 
     init {
         val filmApi: BreakingBadApi = get(BreakingBadApi::class.java)
@@ -49,8 +52,8 @@ class FilmsViewModel : ViewModel() {
         }
     }
 
-    fun openFilm(film: Film){
-        navHostController.navigate("film/${film.id}")
+    fun openFilm(film: Film, navHostController: NavHostController){
+        navHostController.navigate("film/${film.id}/${film.Name}/${film.Logo.replace("/"," ")}/${Gson().toJson(film.tags)}/${film.description}/${film.ageRate}")
     }
 
 }
